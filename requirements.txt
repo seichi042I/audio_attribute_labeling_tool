@@ -1,0 +1,15 @@
+altgraph==0.17.4
+colorama==0.4.6
+CTkMessagebox==2.5
+customtkinter==5.2.2
+darkdetect==0.8.0
+iniconfig==2.0.0
+numpy==1.26.4
+packaging==24.0
+pefile==2023.2.7
+pillow==10.2.0
+pluggy==1.4.0
+pygame==2.5.2
+pywin32-ctypes==0.2.2
+six==1.16.0
+tqdm==4.66.2
