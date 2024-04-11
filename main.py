@@ -15,7 +15,7 @@ class AudioLabelingApp:
         # Variables
         self.audio_folder_path = tk.StringVar()
         self.current_audio_index = 0
-        self.attributes = ["Attribute1", "Attribute2", "Attribute3"]  # Example attributes
+        self.attributes = ["happy", "angry", "sad","relax"]  # Example attributes
         self.labels = []
         self.current_audio_file_name = tk.StringVar(value="No audio selected")
 
@@ -36,15 +36,15 @@ class AudioLabelingApp:
         # Control Buttons
         self.control_button_frame = tk.Frame(master)
         self.control_button_frame.grid(row=2,column=0,columnspan=3)
-        self.button_prev = tk.Button(self.control_button_frame, text="前", command=self.play_previous)
+        self.button_prev = tk.Button(self.control_button_frame, text="previous", command=self.play_previous)
         self.button_prev.grid(row=2, column=0, padx=10, pady=10)
-        self.button_play = tk.Button(self.control_button_frame, text="再生", command=self.play_current)
+        self.button_play = tk.Button(self.control_button_frame, text="play", command=self.play_current)
         self.button_play.grid(row=2, column=1, padx=10, pady=10)
-        self.button_next = tk.Button(self.control_button_frame, text="次", command=self.play_next)
+        self.button_next = tk.Button(self.control_button_frame, text="next", command=self.play_next)
         self.button_next.grid(row=2, column=2, padx=10, pady=10)
 
         # Label for Added Attributes Section
-        self.label_added_attributes = tk.Label(master, text="選択された属性:")
+        self.label_added_attributes = tk.Label(master, text="selected:")
         self.label_added_attributes.grid(row=3, column=0, columnspan=3)
 
         # Frame for Added Attributes
@@ -59,8 +59,8 @@ class AudioLabelingApp:
             btn.grid(row=0, column=i, padx=10, pady=10)
 
         # Save Button
-        self.button_save = tk.Button(master, text="Save Labels", command=self.save_labels)
-        self.button_save.grid(row=6, column=1, padx=10, pady=10)
+        self.button_save = tk.Button(master, text="Save to CSV", command=self.save_labels)
+        self.button_save.grid(row=6, column=2, padx=10, pady=10)
 
     def browse_folder(self):
         folder_selected = filedialog.askdirectory()
