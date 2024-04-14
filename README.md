@@ -12,4 +12,4 @@ pip install -r requirements.txt
 python main.py
 ```
 
-![alt text](image.png)
+![alt text](main_window.png)
