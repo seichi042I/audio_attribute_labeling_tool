@@ -16,7 +16,8 @@ class AudioLabelingApp:
         self.audio_folder_path = tk.StringVar()
         self.current_audio_index = 0
         self.attributes = ["happy", "angry", "sad","relax"]  # Example attributes
-        self.labels = []
+        self.primary_label = []
+        self.secondary_labels = []
         self.current_audio_file_name = tk.StringVar(value="No audio selected")
 
         # Audio Folder Input
@@ -44,23 +45,31 @@ class AudioLabelingApp:
         self.button_next.grid(row=2, column=2, padx=10, pady=10)
 
         # Label for Added Attributes Section
-        self.label_added_attributes = tk.Label(master, text="selected:")
+        self.label_added_attributes = tk.Label(master, text="Primary Attribute")
         self.label_added_attributes.grid(row=3, column=0, columnspan=3)
 
         # Frame for Added Attributes
-        self.added_attributes_frame = tk.Frame(master)
-        self.added_attributes_frame.grid(row=4, column=0, columnspan=3)
+        self.added_primary_attributes_frame = tk.Frame(master)
+        self.added_primary_attributes_frame.grid(row=4, column=0, columnspan=3)
+        
+        # Label for Added Attributes Section
+        self.label_added_attributes = tk.Label(master, text="Secondary Attributes")
+        self.label_added_attributes.grid(row=5, column=0, columnspan=3)
+        
+        # Frame for Added Attributes
+        self.added_secondary_attributes_frame = tk.Frame(master)
+        self.added_secondary_attributes_frame.grid(row=6, column=0, columnspan=3)
 
         # Attributes Section
-        self.attributes_frame = tk.LabelFrame(master, text="Attributes", padx=10, pady=10)
-        self.attributes_frame.grid(row=5, column=0, columnspan=3, sticky="ew", padx=10, pady=10)
+        self.attributes_frame = tk.LabelFrame(master, text="Attributes choices", padx=10, pady=10)
+        self.attributes_frame.grid(row=7, column=0, columnspan=3, sticky="ew", padx=10, pady=10)
         for i, attribute in enumerate(self.attributes):
             btn = tk.Button(self.attributes_frame, text=attribute, command=lambda attr=attribute: self.add_attribute(attr))
             btn.grid(row=0, column=i, padx=10, pady=10)
 
         # Save Button
         self.button_save = tk.Button(master, text="Save to CSV", command=self.save_labels)
-        self.button_save.grid(row=6, column=2, padx=10, pady=10)
+        self.button_save.grid(row=8, column=2, padx=10, pady=10)
 
     def browse_folder(self):
         folder_selected = filedialog.askdirectory()
@@ -70,7 +79,10 @@ class AudioLabelingApp:
     def load_audio_files(self):
         self.audio_files = [f for f in os.listdir(self.audio_folder_path.get()) if f.endswith('.wav')]
         self.current_audio_index = 0
-        self.labels = [{} for _ in self.audio_files]
+        self.primary_label = [{"primary_att":None} for _ in self.audio_files]
+        self.secondary_labels = [{} for _ in self.audio_files]
+        print(self.primary_label)
+        
         self.update_ui_elements()
 
     def update_ui_elements(self):
@@ -80,15 +92,15 @@ class AudioLabelingApp:
         else:
             self.current_audio_file_name.set("No audio files found in the folder")
 
-    def update_added_attributes_frame(self):
-        # Clear existing attribute buttons
-        for widget in self.added_attributes_frame.winfo_children():
-            widget.destroy()
+    # def update_added_attributes_frame(self):
+    #     # Clear existing attribute buttons
+    #     for widget in self.added_attributes_frame.winfo_children():
+    #         widget.destroy()
 
-        # Create a button for each added attribute
-        for attr in self.labels[self.current_audio_index].keys():
-            btn = tk.Button(self.added_attributes_frame, text=attr, command=lambda attr=attr: self.remove_attribute(attr))
-            btn.pack(side="left", padx=5)
+    #     # Create a button for each added attribute
+    #     for attr in self.labels[self.current_audio_index].keys():
+    #         btn = tk.Button(self.added_attributes_frame, text=attr, command=lambda attr=attr: self.remove_attribute(attr))
+    #         btn.pack(side="left", padx=5)
 
     def play_audio(self, index):
         if 0 <= index < len(self.audio_files):
@@ -109,22 +121,50 @@ class AudioLabelingApp:
             self.play_audio(self.current_audio_index + 1)
 
     def add_attribute(self, attribute):
-        current_file = self.audio_files[self.current_audio_index]
-        if attribute not in self.labels[self.current_audio_index]:
-            self.labels[self.current_audio_index][attribute] = True
-            self.update_added_attributes_frame()
+        if self.primary_label[self.current_audio_index]["primary_att"] is None:
+            # This is the first label clicked, make it the primary label
+            if attribute not in self.secondary_labels[self.current_audio_index]:
+                self.primary_label[self.current_audio_index]["primary_att"] = attribute
+        else:
+            # All other labels are considered secondary
+            if attribute not in self.secondary_labels[self.current_audio_index]:
+                if attribute != self.primary_label[self.current_audio_index]["primary_att"]:
+                    self.secondary_labels[self.current_audio_index][attribute] = True
+        self.update_added_attributes_frame()
 
     def remove_attribute(self, attribute):
-        if attribute in self.labels[self.current_audio_index]:
-            del self.labels[self.current_audio_index][attribute]
-            self.update_added_attributes_frame()
+        if attribute == self.primary_label[self.current_audio_index]["primary_att"]:
+            # Removing the primary label
+            self.primary_label[self.current_audio_index]["primary_att"] = None
+        elif attribute in self.secondary_labels[self.current_audio_index]:
+            # Remove from secondary labels
+            del self.secondary_labels[self.current_audio_index][attribute]
+        self.update_added_attributes_frame()
+
+    def update_added_attributes_frame(self):
+        # Clear existing attribute buttons
+        for widget in self.added_primary_attributes_frame.winfo_children():
+            widget.destroy()
+        for widget in self.added_secondary_attributes_frame.winfo_children():
+            widget.destroy()
+
+        # Create a button for primary attribute if it exists
+        if self.primary_label[self.current_audio_index]["primary_att"]:
+            btn = tk.Button(self.added_primary_attributes_frame, text=self.primary_label[self.current_audio_index]["primary_att"], command=lambda: self.remove_attribute(self.primary_label[self.current_audio_index]["primary_att"]))
+            btn.pack(side="left", padx=5)
+
+        # Create a button for each secondary attribute
+        for attr in self.secondary_labels[self.current_audio_index]:
+            btn = tk.Button(self.added_secondary_attributes_frame, text=attr, command=lambda attr=attr: self.remove_attribute(attr))
+            btn.pack(side="left", padx=5)
+
 
     def save_labels(self):
         save_path = filedialog.asksaveasfilename(defaultextension=".csv")
         with open(save_path, mode="w", newline='') as file:
             writer = csv.writer(file)
-            for file_name, attributes in zip(self.audio_files, self.labels):
-                writer.writerow([file_name, '|'.join(attributes.keys())])
+            for file_name, primary,secondary in zip(self.audio_files, self.primary_label,self.secondary_labels):
+                writer.writerow([file_name,primary["primary_att"], '|'.join(secondary.keys())])
         messagebox.showinfo("Save Successful", "Labels have been saved successfully.")
         
     def load_csv(self):
@@ -138,15 +178,17 @@ class AudioLabelingApp:
                 # Reset labels
                 self.labels = [{} for _ in self.audio_files]
                 for row in reader:
-                    file_name, attributes_str = row
-                    attributes = attributes_str.split('|')
+                    file_name, primary, secondary_str = row
+                    secondaries = secondary_str.split('|')
                     # Find the index of the file_name in audio_files
                     if file_name in self.audio_files:
                         index = self.audio_files.index(file_name)
-                        for attr in attributes:
+                        if primary:
+                            self.primary_label[index]["primary_att"] = primary
+                        for attr in secondaries:
                             if attr == "":
                                 break
-                            self.labels[index][attr] = True
+                            self.secondary_labels[index][attr] = True
                 messagebox.showinfo("Load Successful", "CSV file has been loaded successfully.")
                 self.update_ui_elements()
         except Exception as e:
