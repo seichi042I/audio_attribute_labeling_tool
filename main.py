@@ -81,7 +81,7 @@ class AudioLabelingApp:
         for i, attribute in enumerate(self.negative_attributes):
             btn = tk.Button(self.negative_frame, text=attribute, command=lambda attr=attribute: self.add_attribute(attr))
             btn.grid(row=0, column=i, padx=10, pady=10)
-        self.other_frame = tk.LabelFrame(self.attributes_frame,text="negative",padx=10,pady=10)
+        self.other_frame = tk.LabelFrame(self.attributes_frame,text="other",padx=10,pady=10)
         self.other_frame.grid(row=2, column=0, columnspan=3, sticky="ew", padx=10, pady=10)
         for i, attribute in enumerate(self.other_attributes):
             btn = tk.Button(self.other_frame, text=attribute, command=lambda attr=attribute: self.add_attribute(attr))
