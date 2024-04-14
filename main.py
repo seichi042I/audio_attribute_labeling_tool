@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
+from tkinter import font
 import os
 import csv
 from pygame import mixer
@@ -8,6 +9,9 @@ class AudioLabelingApp:
     def __init__(self, master):
         self.master = master
         self.master.title("Audio Labeling Tool")
+        self.master.columnconfigure(0, weight=1)
+        # Fontオブジェクトを作成
+        self.custom_font = font.Font(family='Helvetica', size=12, weight='bold')
         
         # Initialize pygame mixer
         mixer.init()
@@ -15,7 +19,10 @@ class AudioLabelingApp:
         # Variables
         self.audio_folder_path = tk.StringVar()
         self.current_audio_index = 0
-        self.attributes = ["happy", "angry", "sad","relax"]  # Example attributes
+        self.positive_attributes = ["joy", "anticipation","trust"]
+        self.negative_attributes = ["sadness","anger", "fear", "disgust"]
+        self.other_attributes = ["surprise"]
+        self.attributes = self.positive_attributes+self.negative_attributes+self.other_attributes  # Example attributes
         self.primary_label = []
         self.secondary_labels = []
         self.current_audio_file_name = tk.StringVar(value="No audio selected")
@@ -63,14 +70,38 @@ class AudioLabelingApp:
         # Attributes Section
         self.attributes_frame = tk.LabelFrame(master, text="Attributes choices", padx=10, pady=10)
         self.attributes_frame.grid(row=7, column=0, columnspan=3, sticky="ew", padx=10, pady=10)
-        for i, attribute in enumerate(self.attributes):
-            btn = tk.Button(self.attributes_frame, text=attribute, command=lambda attr=attribute: self.add_attribute(attr))
+        self.attributes_frame.columnconfigure(0, weight=1)
+        self.positive_frame = tk.LabelFrame(self.attributes_frame,text="positive",padx=10,pady=10)
+        self.positive_frame.grid(row=0, column=0, columnspan=3, sticky="ew", padx=10, pady=10)
+        for i, attribute in enumerate(self.positive_attributes):
+            btn = tk.Button(self.positive_frame, text=attribute, command=lambda attr=attribute: self.add_attribute(attr))
+            btn.grid(row=0, column=i, padx=10, pady=10)
+        self.negative_frame = tk.LabelFrame(self.attributes_frame,text="negative",padx=10,pady=10)
+        self.negative_frame.grid(row=1, column=0, columnspan=3, sticky="ew", padx=10, pady=10)
+        for i, attribute in enumerate(self.negative_attributes):
+            btn = tk.Button(self.negative_frame, text=attribute, command=lambda attr=attribute: self.add_attribute(attr))
+            btn.grid(row=0, column=i, padx=10, pady=10)
+        self.other_frame = tk.LabelFrame(self.attributes_frame,text="negative",padx=10,pady=10)
+        self.other_frame.grid(row=2, column=0, columnspan=3, sticky="ew", padx=10, pady=10)
+        for i, attribute in enumerate(self.other_attributes):
+            btn = tk.Button(self.other_frame, text=attribute, command=lambda attr=attribute: self.add_attribute(attr))
             btn.grid(row=0, column=i, padx=10, pady=10)
 
         # Save Button
         self.button_save = tk.Button(master, text="Save to CSV", command=self.save_labels)
         self.button_save.grid(row=8, column=2, padx=10, pady=10)
+        
+        
+        self.apply_font_to_all_widgets(self.master,self.custom_font)
 
+    def apply_font_to_all_widgets(self,parent, font):
+        for widget in parent.winfo_children():
+            if hasattr(widget, 'children'):
+                self.apply_font_to_all_widgets(widget, font)
+            try:
+                widget.configure(font=font)
+            except tk.TclError:
+                pass  # ウィジェットがフォントプロパティをサポートしていない場合は無視
     def browse_folder(self):
         folder_selected = filedialog.askdirectory()
         self.audio_folder_path.set(folder_selected)
@@ -81,7 +112,6 @@ class AudioLabelingApp:
         self.current_audio_index = 0
         self.primary_label = [{"primary_att":None} for _ in self.audio_files]
         self.secondary_labels = [{} for _ in self.audio_files]
-        print(self.primary_label)
         
         self.update_ui_elements()
 
@@ -150,12 +180,12 @@ class AudioLabelingApp:
 
         # Create a button for primary attribute if it exists
         if self.primary_label[self.current_audio_index]["primary_att"]:
-            btn = tk.Button(self.added_primary_attributes_frame, text=self.primary_label[self.current_audio_index]["primary_att"], command=lambda: self.remove_attribute(self.primary_label[self.current_audio_index]["primary_att"]))
+            btn = tk.Button(self.added_primary_attributes_frame, text=self.primary_label[self.current_audio_index]["primary_att"],font=self.custom_font, command=lambda: self.remove_attribute(self.primary_label[self.current_audio_index]["primary_att"]))
             btn.pack(side="left", padx=5)
 
         # Create a button for each secondary attribute
         for attr in self.secondary_labels[self.current_audio_index]:
-            btn = tk.Button(self.added_secondary_attributes_frame, text=attr, command=lambda attr=attr: self.remove_attribute(attr))
+            btn = tk.Button(self.added_secondary_attributes_frame, text=attr,font=self.custom_font, command=lambda attr=attr: self.remove_attribute(attr))
             btn.pack(side="left", padx=5)
 
 
