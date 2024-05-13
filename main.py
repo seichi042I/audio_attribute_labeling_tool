@@ -6,6 +6,43 @@ from pathlib import Path
 import csv
 from pygame import mixer
 
+jp2en = {
+    # main 8 att
+    "喜び":"joy",
+    "悲しみ":"sadness",
+    "期待":"anticipation",
+    "驚き":"surprise",
+    "怒り":"anger",
+    "恐れ":"fear",
+    "嫌悪":"disgust",
+    "信頼":"trust",
+    
+    # positive subatt 
+    "楽しい":"fun",
+    "わかりみ":"understand",
+    "同意・肯定":"certainly",
+    "～しましょう":"shall_we",
+    "激励・声援":"encouraging",
+    "自身満々":"confidently",
+    "幸せ":"happiness",
+    "わくわく":"exciting",
+    "笑顔":"smile",
+    "くつろぎ":"relax",
+    
+    # negative subatt
+    "苦痛":"pain",
+    "動揺・混乱":"flustered",
+    "イライラ(軽)":"annoyed",
+    "やっちゃった...(軽落胆)":"dismay",
+    
+    # other subatt
+    "見くびる":"underestimate",
+    "疑問":"question",
+    "真剣に・真面目に":"seriously",
+    "緊張":"nervous",
+}
+en2jp = inverted_dict = {value: key for key, value in jp2en.items()}
+
 class AudioLabelingApp:
     def __init__(self, master):
         self.master = master
@@ -20,10 +57,11 @@ class AudioLabelingApp:
         # Variables
         self.audio_folder_path = tk.StringVar()
         self.current_audio_index = 0
-        self.main8_attributes = ["joy","anticipation","trust","surprise","sadness","anger","fear", "disgust"]
-        self.positive_attributes = ["fun","understand","certainly","shall_we","encouraging","confidently","happiness"]
-        self.negative_attributes = ["pain","flustered"]
-        self.other_attributes = ["underestimate","question"]
+        ["見くびる","疑問","真剣に・真面目に・","緊張"]
+        self.main8_attributes = ["喜び","悲しみ","期待","驚き","怒り","恐れ","嫌悪","信頼"]
+        self.positive_attributes = ["楽しい","わかりみ","同意・肯定","～しましょう","激励・声援","自信満々","幸せ","わくわく","笑顔","くつろぎ"]
+        self.negative_attributes = ["苦痛","動揺・混乱","イライラ(軽)","やっちゃった...(軽落胆)"]
+        self.other_attributes = ["見くびる","疑問","真剣に・真面目に・","緊張"]
         self.attributes = self.positive_attributes+self.negative_attributes+self.other_attributes  # Example attributes
         self.primary_label = []
         self.secondary_labels = []
@@ -135,7 +173,7 @@ class AudioLabelingApp:
         self.secondary_labels = [{} for _ in self.audio_files]
         
         self.update_ui_elements()
-        self._load_csv((audio_folder_parent_path/"emotion_labels_utf8.csv"),error_msg=True)
+        self._load_csv((audio_folder_parent_path/"emotion_labels_utf8_en.csv"),error_msg=True)
 
     def update_ui_elements(self):
         if self.audio_files:
@@ -219,10 +257,13 @@ class AudioLabelingApp:
 
     def save_labels(self):
         save_path = filedialog.asksaveasfilename(defaultextension=".csv",initialfile="emotion_labels_utf8.csv",initialdir=Path(self.audio_folder_path.get()).parent)
-        with open(save_path, mode="w", newline='') as file:
-            writer = csv.writer(file)
-            for file_name, primary,secondary in zip(self.audio_files, self.primary_label,self.secondary_labels):
-                writer.writerow([file_name,primary["primary_att"], '|'.join(secondary.keys())])
+        with open(save_path.replace(".csv","_jp.csv"), mode="w", newline='') as file_jp:
+            with open(save_path.replace(".csv","_en.csv"), mode="w", newline='') as file_en:
+                writer_jp = csv.writer(file_jp)
+                writer_en = csv.writer(file_en)
+                for file_name, primary,secondary in zip(self.audio_files, self.primary_label,self.secondary_labels):
+                    writer_jp.writerow([file_name,primary["primary_att"], '|'.join(secondary.keys())])
+                    writer_en.writerow([jp2en.get(file_name,primary["primary_att"]), '|'.join([jp2en.get(x) for x in secondary.keys()])])
         messagebox.showinfo("Save Successful", "Labels have been saved successfully.")
         
     def load_csv(self):
@@ -245,12 +286,12 @@ class AudioLabelingApp:
                     if file_name in self.audio_files:
                         index = self.audio_files.index(file_name)
                         if primary:
-                            self.primary_label[index]["primary_att"] = primary
+                            self.primary_label[index]["primary_att"] = en2jp.get(primary,primary)
                             self.current_audio_index = index
                         for attr in secondaries:
                             if attr == "":
                                 break
-                            self.secondary_labels[index][attr] = True
+                            self.secondary_labels[index][en2jp.get(attr,attr)] = True
                 self.current_audio_index += 1
                 messagebox.showinfo("Load Successful", "CSV file has been loaded successfully.")
                 self.update_ui_elements()
