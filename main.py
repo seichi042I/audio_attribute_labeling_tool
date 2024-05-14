@@ -28,6 +28,8 @@ jp2en = {
     "わくわく":"exciting",
     "笑顔":"smile",
     "くつろぎ":"relax",
+    "なごみ":"comforted",
+    "やる気":"motivated",
     
     # negative subatt
     "苦痛":"pain",
@@ -59,7 +61,7 @@ class AudioLabelingApp:
         self.current_audio_index = 0
         ["見くびる","疑問","真剣に・真面目に・","緊張"]
         self.main8_attributes = ["喜び","悲しみ","期待","驚き","怒り","恐れ","嫌悪","信頼"]
-        self.positive_attributes = ["楽しい","わかりみ","同意・肯定","～しましょう","激励・声援","自信満々","幸せ","わくわく","笑顔","くつろぎ"]
+        self.positive_attributes = ["楽しい","わかりみ","同意・肯定","～しましょう","激励・声援","自信満々","幸せ","わくわく","笑顔","くつろぎ","なごみ","やる気"]
         self.negative_attributes = ["苦痛","動揺・混乱","イライラ(軽)","やっちゃった...(軽落胆)"]
         self.other_attributes = ["見くびる","疑問","真剣に・真面目に・","緊張"]
         self.attributes = self.positive_attributes+self.negative_attributes+self.other_attributes  # Example attributes
@@ -262,8 +264,10 @@ class AudioLabelingApp:
                 writer_jp = csv.writer(file_jp)
                 writer_en = csv.writer(file_en)
                 for file_name, primary,secondary in zip(self.audio_files, self.primary_label,self.secondary_labels):
-                    writer_jp.writerow([file_name,primary["primary_att"], '|'.join(secondary.keys())])
-                    writer_en.writerow([jp2en.get(file_name,primary["primary_att"]), '|'.join([jp2en.get(x) for x in secondary.keys()])])
+                    print(file_name,primary['primary_att'],secondary)
+                    primary_att = primary['primary_att'] if primary['primary_att'] else ""
+                    writer_jp.writerow([file_name,primary_att, '|'.join(secondary.keys())])
+                    writer_en.writerow([file_name,jp2en.get(primary_att), '|'.join([jp2en.get(x,"") if x else "" for x in secondary.keys()])])
         messagebox.showinfo("Save Successful", "Labels have been saved successfully.")
         
     def load_csv(self):
