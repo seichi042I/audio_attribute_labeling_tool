@@ -15,7 +15,6 @@ jp2en = {
     "悲しみ":"sadness",
     "恐怖":"fear", 
     "嫌悪":"disgust",
-    "疑問":"question",
     "困惑":"anticipation",
     "つらい(苦しみ)":"grueling",
     "不安":"anxiety",
@@ -53,6 +52,7 @@ jp2en = {
     
     
     # other subatt
+    "疑問":"question",
     "依頼":"request",
     "提案":"offer",
     "説明":"account",
@@ -79,10 +79,10 @@ class AudioLabelingApp:
         self.audio_folder_path = tk.StringVar()
         self.current_audio_index = 0
         ["見くびる","疑問","真剣に・真面目に・","緊張"]
-        self.emotion_labels = ["ナチュラル","喜び","驚き","怒り","悲しみ","恐怖", "嫌悪","疑問","困惑","つらい(苦しみ)","不安","落胆","呆れ","心配","安堵","焦り","謝罪",]
+        self.emotion_labels = ["ナチュラル","喜び","驚き","怒り","悲しみ","恐怖", "嫌悪","困惑","つらい(苦しみ)","不安","落胆","呆れ","心配","安堵","焦り","謝罪",]
         self.positive_nuance = ["楽しい","わかりみ","同意・肯定","～しましょう","激励・声援","自身満々","幸せ","わくわく","笑顔","くつろぎ","なごみ","やる気","感謝"]
         self.negative_nuance = ["苦痛","動揺・混乱","イライラ(軽)","やっちゃった...(軽落胆)","疲弊"]
-        self.other_nuance = ["提案","依頼","説明","見くびる","疑問","質問","真剣に・真面目に・","緊張"]
+        self.other_nuance = ["提案","疑問","依頼","説明","見くびる","疑問","質問","真剣に・真面目に・","緊張"]
         self.attributes = self.positive_nuance+self.negative_nuance+self.other_nuance  # Example attributes
         self.primary_label = []
         self.secondary_labels = []
