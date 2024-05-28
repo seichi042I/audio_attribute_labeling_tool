@@ -7,18 +7,29 @@ import csv
 from pygame import mixer
 
 jp2en = {
-    # main 8 att
+    # emotions
+    "ナチュラル":"natural",
     "喜び":"joy",
-    "悲しみ":"sadness",
-    "期待":"anticipation",
     "驚き":"surprise",
     "怒り":"anger",
-    "恐れ":"fear",
+    "悲しみ":"sadness",
+    "恐怖":"fear", 
     "嫌悪":"disgust",
-    "信頼":"trust",
+    "疑問":"question",
+    "困惑":"anticipation",
+    "つらい(苦しみ)":"grueling",
+    "不安":"anxiety",
+    "落胆":"disappointment",
+    "呆れ":"stunned",
+    "心配":"anxiety",
+    "安堵":"relief",
+    "焦り":"impatience",
+    "謝罪":"apology",
+    
     
     # positive subatt 
     "楽しい":"fun",
+    "期待":"expectation",
     "わかりみ":"understand",
     "同意・肯定":"certainly",
     "～しましょう":"shall_we",
@@ -30,16 +41,24 @@ jp2en = {
     "くつろぎ":"relax",
     "なごみ":"comforted",
     "やる気":"motivated",
+    "感謝":"thanks",
+    
     
     # negative subatt
     "苦痛":"pain",
     "動揺・混乱":"flustered",
     "イライラ(軽)":"annoyed",
     "やっちゃった...(軽落胆)":"dismay",
+    "疲弊":"exhaustion",
+    
     
     # other subatt
+    "依頼":"request",
+    "提案":"offer",
+    "説明":"account",
     "見くびる":"underestimate",
     "疑問":"question",
+    "質問":"ask",
     "真剣に・真面目に":"seriously",
     "緊張":"nervous",
 }
@@ -60,11 +79,11 @@ class AudioLabelingApp:
         self.audio_folder_path = tk.StringVar()
         self.current_audio_index = 0
         ["見くびる","疑問","真剣に・真面目に・","緊張"]
-        self.main8_attributes = ["喜び","悲しみ","期待","驚き","怒り","恐れ","嫌悪","信頼"]
-        self.positive_attributes = ["楽しい","わかりみ","同意・肯定","～しましょう","激励・声援","自信満々","幸せ","わくわく","笑顔","くつろぎ","なごみ","やる気"]
-        self.negative_attributes = ["苦痛","動揺・混乱","イライラ(軽)","やっちゃった...(軽落胆)"]
-        self.other_attributes = ["見くびる","疑問","真剣に・真面目に・","緊張"]
-        self.attributes = self.positive_attributes+self.negative_attributes+self.other_attributes  # Example attributes
+        self.emotion_labels = ["ナチュラル","喜び","驚き","怒り","悲しみ","恐怖", "嫌悪","疑問","困惑","つらい(苦しみ)","不安","落胆","呆れ","心配","安堵","焦り","謝罪",]
+        self.positive_nuance = ["楽しい","わかりみ","同意・肯定","～しましょう","激励・声援","自身満々","幸せ","わくわく","笑顔","くつろぎ","なごみ","やる気","感謝"]
+        self.negative_nuance = ["苦痛","動揺・混乱","イライラ(軽)","やっちゃった...(軽落胆)","疲弊"]
+        self.other_nuance = ["提案","依頼","説明","見くびる","疑問","質問","真剣に・真面目に・","緊張"]
+        self.attributes = self.positive_nuance+self.negative_nuance+self.other_nuance  # Example attributes
         self.primary_label = []
         self.secondary_labels = []
         self.current_audio_file_name = tk.StringVar(value="No audio selected")
@@ -107,15 +126,15 @@ class AudioLabelingApp:
         
 
         # Label for Added Attributes Section
-        self.label_added_attributes = tk.Label(master, text="Primary Attribute")
+        self.label_added_attributes = tk.Label(master, text="Emotion")
         self.label_added_attributes.grid(row=4, column=0, columnspan=3)
 
         # Frame for Added Attributes
-        self.added_primary_attributes_frame = tk.Frame(master)
-        self.added_primary_attributes_frame.grid(row=5, column=0, columnspan=3)
+        self.added_emotionributes_frame = tk.Frame(master)
+        self.added_emotionributes_frame.grid(row=5, column=0, columnspan=3)
         
         # Label for Added Attributes Section
-        self.label_added_attributes = tk.Label(master, text="Secondary Attributes")
+        self.label_added_attributes = tk.Label(master, text="Nuance")
         self.label_added_attributes.grid(row=6, column=0, columnspan=3)
         
         # Frame for Added Attributes
@@ -123,27 +142,27 @@ class AudioLabelingApp:
         self.added_secondary_attributes_frame.grid(row=7, column=0, columnspan=3)
 
         # Attributes Section
-        self.attributes_frame = tk.LabelFrame(master, text="Attributes choices", padx=10, pady=10)
+        self.attributes_frame = tk.LabelFrame(master, text="", padx=10, pady=10)
         self.attributes_frame.grid(row=8, column=0, columnspan=3, sticky="ew", padx=10, pady=10)
         self.attributes_frame.columnconfigure(0, weight=1)
-        self.main8_frame = tk.LabelFrame(self.attributes_frame,text="main8",padx=10,pady=10)
-        self.main8_frame.grid(row=0, column=0, columnspan=3, sticky="ew", padx=10, pady=10)
-        for i, attribute in enumerate(self.main8_attributes):
-            btn = tk.Button(self.main8_frame, text=attribute, command=lambda attr=attribute: self.add_attribute(attr))
+        self.emotion_frame = tk.LabelFrame(self.attributes_frame,text="Emotion",padx=10,pady=10)
+        self.emotion_frame.grid(row=0, column=0, columnspan=3, sticky="ew", padx=10, pady=10)
+        for i, attribute in enumerate(self.emotion_labels):
+            btn = tk.Button(self.emotion_frame, text=attribute, command=lambda attr=attribute: self.add_attribute(attr))
             btn.grid(row=0, column=i, padx=10, pady=10)
-        self.positive_frame = tk.LabelFrame(self.attributes_frame,text="positive",padx=10,pady=10)
+        self.positive_frame = tk.LabelFrame(self.attributes_frame,text="positive nuance",padx=10,pady=10)
         self.positive_frame.grid(row=1, column=0, columnspan=3, sticky="ew", padx=10, pady=10)
-        for i, attribute in enumerate(self.positive_attributes):
+        for i, attribute in enumerate(self.positive_nuance):
             btn = tk.Button(self.positive_frame, text=attribute, command=lambda attr=attribute: self.add_attribute(attr))
             btn.grid(row=0, column=i, padx=10, pady=10)
-        self.negative_frame = tk.LabelFrame(self.attributes_frame,text="negative",padx=10,pady=10)
+        self.negative_frame = tk.LabelFrame(self.attributes_frame,text="negative nuance",padx=10,pady=10)
         self.negative_frame.grid(row=2, column=0, columnspan=3, sticky="ew", padx=10, pady=10)
-        for i, attribute in enumerate(self.negative_attributes):
+        for i, attribute in enumerate(self.negative_nuance):
             btn = tk.Button(self.negative_frame, text=attribute, command=lambda attr=attribute: self.add_attribute(attr))
             btn.grid(row=0, column=i, padx=10, pady=10)
-        self.other_frame = tk.LabelFrame(self.attributes_frame,text="other",padx=10,pady=10)
+        self.other_frame = tk.LabelFrame(self.attributes_frame,text="other nuance",padx=10,pady=10)
         self.other_frame.grid(row=3, column=0, columnspan=3, sticky="ew", padx=10, pady=10)
-        for i, attribute in enumerate(self.other_attributes):
+        for i, attribute in enumerate(self.other_nuance):
             btn = tk.Button(self.other_frame, text=attribute, command=lambda attr=attribute: self.add_attribute(attr))
             btn.grid(row=0, column=i, padx=10, pady=10)
 
@@ -171,7 +190,7 @@ class AudioLabelingApp:
         self.audio_files = [f for f in os.listdir(self.audio_folder_path.get()) if f.endswith('.wav')]
         audio_folder_parent_path = Path(self.audio_folder_path.get()).parent
         self.current_audio_index = 0
-        self.primary_label = [{"primary_att":None} for _ in self.audio_files]
+        self.primary_label = [{"emotion":None} for _ in self.audio_files]
         self.secondary_labels = [{} for _ in self.audio_files]
         
         self.update_ui_elements()
@@ -219,21 +238,21 @@ class AudioLabelingApp:
             self.play_audio(index)
             
     def add_attribute(self, attribute):
-        if self.primary_label[self.current_audio_index]["primary_att"] is None:
+        if self.primary_label[self.current_audio_index]["emotion"] is None:
             # This is the first label clicked, make it the primary label
             if attribute not in self.secondary_labels[self.current_audio_index]:
-                self.primary_label[self.current_audio_index]["primary_att"] = attribute
+                self.primary_label[self.current_audio_index]["emotion"] = attribute
         else:
             # All other labels are considered secondary
-            if attribute not in self.secondary_labels[self.current_audio_index]:
-                if attribute != self.primary_label[self.current_audio_index]["primary_att"]:
+            if attribute not in self.secondary_labels[self.current_audio_index] and attribute not in self.emotion_labels:
+                if attribute != self.primary_label[self.current_audio_index]["emotion"]:
                     self.secondary_labels[self.current_audio_index][attribute] = True
         self.update_added_attributes_frame()
 
     def remove_attribute(self, attribute):
-        if attribute == self.primary_label[self.current_audio_index]["primary_att"]:
+        if attribute == self.primary_label[self.current_audio_index]["emotion"]:
             # Removing the primary label
-            self.primary_label[self.current_audio_index]["primary_att"] = None
+            self.primary_label[self.current_audio_index]["emotion"] = None
         elif attribute in self.secondary_labels[self.current_audio_index]:
             # Remove from secondary labels
             del self.secondary_labels[self.current_audio_index][attribute]
@@ -241,14 +260,14 @@ class AudioLabelingApp:
 
     def update_added_attributes_frame(self):
         # Clear existing attribute buttons
-        for widget in self.added_primary_attributes_frame.winfo_children():
+        for widget in self.added_emotionributes_frame.winfo_children():
             widget.destroy()
         for widget in self.added_secondary_attributes_frame.winfo_children():
             widget.destroy()
 
         # Create a button for primary attribute if it exists
-        if self.primary_label[self.current_audio_index]["primary_att"]:
-            btn = tk.Button(self.added_primary_attributes_frame, text=self.primary_label[self.current_audio_index]["primary_att"],font=self.custom_font, command=lambda: self.remove_attribute(self.primary_label[self.current_audio_index]["primary_att"]))
+        if self.primary_label[self.current_audio_index]["emotion"]:
+            btn = tk.Button(self.added_emotionributes_frame, text=self.primary_label[self.current_audio_index]["emotion"],font=self.custom_font, command=lambda: self.remove_attribute(self.primary_label[self.current_audio_index]["emotion"]))
             btn.pack(side="left", padx=5)
 
         # Create a button for each secondary attribute
@@ -264,10 +283,10 @@ class AudioLabelingApp:
                 writer_jp = csv.writer(file_jp)
                 writer_en = csv.writer(file_en)
                 for file_name, primary,secondary in zip(self.audio_files, self.primary_label,self.secondary_labels):
-                    print(file_name,primary['primary_att'],secondary)
-                    primary_att = primary['primary_att'] if primary['primary_att'] else ""
-                    writer_jp.writerow([file_name,primary_att, '|'.join(secondary.keys())])
-                    writer_en.writerow([file_name,jp2en.get(primary_att), '|'.join([jp2en.get(x,"") if x else "" for x in secondary.keys()])])
+                    print(file_name,primary['emotion'],secondary)
+                    emotion = primary['emotion'] if primary['emotion'] else ""
+                    writer_jp.writerow([file_name,emotion, '|'.join(secondary.keys())])
+                    writer_en.writerow([file_name,jp2en.get(emotion), '|'.join([jp2en.get(x,"") if x else "" for x in secondary.keys()])])
         messagebox.showinfo("Save Successful", "Labels have been saved successfully.")
         
     def load_csv(self):
@@ -290,7 +309,7 @@ class AudioLabelingApp:
                     if file_name in self.audio_files:
                         index = self.audio_files.index(file_name)
                         if primary:
-                            self.primary_label[index]["primary_att"] = en2jp.get(primary,primary)
+                            self.primary_label[index]["emotion"] = en2jp.get(primary,primary)
                             self.current_audio_index = index
                         for attr in secondaries:
                             if attr == "":
