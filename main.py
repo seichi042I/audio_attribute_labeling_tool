@@ -12,13 +12,11 @@ jp2en = {
     "喜び":"joy",
     "驚き":"surprise",
     "怒り":"anger",
-    "悲しみ":"sadness",
-    "恐怖":"fear", 
+    "悲哀":"sorrow",
     "嫌悪":"disgust",
     "困惑":"anticipation",
     "つらい(苦しみ)":"grueling",
     "不安":"anxiety",
-    "落胆":"disappointment",
     "呆れ":"stunned",
     "心配":"anxiety",
     "安堵":"relief",
@@ -26,7 +24,7 @@ jp2en = {
     "謝罪":"apology",
     
     
-    # positive subatt 
+    # positive nuance 
     "楽しい":"fun",
     "期待":"expectation",
     "わかりみ":"understand",
@@ -41,26 +39,41 @@ jp2en = {
     "なごみ":"comforted",
     "やる気":"motivated",
     "感謝":"thanks",
+    "期待":"hope",
+    "得意げ":"proudly",
+    "興奮・熱中":"enthusiastic",
+    "達成":"fulfilment",
+
     
     
-    # negative subatt
+    # negative nuance
     "苦痛":"pain",
     "動揺・混乱":"flustered",
-    "イライラ(軽)":"annoyed",
+    "イライラ(軽)":"light_annoyed",
+    "イライラ(重)":"heavy_havy",
     "やっちゃった...(軽落胆)":"dismay",
     "疲弊":"exhaustion",
+    "恐怖":"fear", 
+    "落胆":"disappointment",
+    "嫌な予感":"have_a_bad_feeling_about",
     
     
-    # other subatt
+    # other nuance
+    "憧憬":"longing",
+    "確認":"check",
+    "不思議":"strange",
     "疑問":"question",
     "依頼":"request",
     "提案":"offer",
     "説明":"account",
     "見くびる":"underestimate",
-    "疑問":"question",
     "質問":"ask",
     "真剣に・真面目に":"seriously",
     "緊張":"nervous",
+    "発見":"discovery",
+    "実況":"live_commentary",
+    "挑発":"provocation"
+
 }
 en2jp = inverted_dict = {value: key for key, value in jp2en.items()}
 
@@ -79,10 +92,10 @@ class AudioLabelingApp:
         self.audio_folder_path = tk.StringVar()
         self.current_audio_index = 0
         ["見くびる","疑問","真剣に・真面目に・","緊張"]
-        self.emotion_labels = ["ナチュラル","喜び","驚き","怒り","悲しみ","恐怖", "嫌悪","困惑","つらい(苦しみ)","不安","落胆","呆れ","心配","安堵","焦り","謝罪",]
-        self.positive_nuance = ["楽しい","わかりみ","同意・肯定","～しましょう","激励・声援","自身満々","幸せ","わくわく","笑顔","くつろぎ","なごみ","やる気","感謝"]
-        self.negative_nuance = ["苦痛","動揺・混乱","イライラ(軽)","やっちゃった...(軽落胆)","疲弊"]
-        self.other_nuance = ["提案","疑問","依頼","説明","見くびる","疑問","質問","真剣に・真面目に・","緊張"]
+        self.emotion_labels = ["ナチュラル","喜び","驚き","怒り","悲哀", "嫌悪","困惑","つらい(苦しみ)","不安","呆れ","心配","安堵","焦り","謝罪",]
+        self.positive_nuance = ["達成","興奮・熱中","得意げ","楽しい","わかりみ","同意・肯定","～しましょう","激励・声援","自身満々","幸せ","わくわく","笑顔","くつろぎ","なごみ","やる気","感謝","期待"]
+        self.negative_nuance = ["嫌な予感","落胆","苦痛","動揺・混乱","イライラ(軽)","イライラ(重)","やっちゃった...(軽落胆)","恐怖","疲弊"]
+        self.other_nuance = ["憧憬","確認","不思議","挑発","提案","疑問","依頼","説明","見くびる","質問","真剣に・真面目に・","緊張","発見","実況"]
         self.attributes = self.positive_nuance+self.negative_nuance+self.other_nuance  # Example attributes
         self.primary_label = []
         self.secondary_labels = []
@@ -278,8 +291,8 @@ class AudioLabelingApp:
 
     def save_labels(self):
         save_path = filedialog.asksaveasfilename(defaultextension=".csv",initialfile="emotion_labels_utf8.csv",initialdir=Path(self.audio_folder_path.get()).parent)
-        with open(save_path.replace(".csv","_jp.csv"), mode="w", newline='') as file_jp:
-            with open(save_path.replace(".csv","_en.csv"), mode="w", newline='') as file_en:
+        with open(save_path.replace(".csv","_jp.csv"), mode="w", newline='', encoding='utf-8') as file_jp:
+            with open(save_path.replace(".csv","_en.csv"), mode="w", newline='', encoding='utf-8') as file_en:
                 writer_jp = csv.writer(file_jp)
                 writer_en = csv.writer(file_en)
                 for file_name, primary,secondary in zip(self.audio_files, self.primary_label,self.secondary_labels):
